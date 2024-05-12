@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% load static %}
+
+{% block js %}
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script src="{% static 'js/main.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<!-- СДЕЛАТЬ ОДНО ОКНО !!!!!!! -->
+<div data-backdrop="static" id="create-note-modal" class="modal" tabindex="">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header alret alert-success">
+        <h5 class="modal-title">Заметка создана</h5>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="delete-note-modal" class="modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header alret alert-danger">
+        <h5 class="modal-title">Заметка удалена</h5>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="vh-100">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col">
+          <div class="card" id="list1" style="border-radius: .75rem; background-color: #eff1f2;">
+            <div id="note-list" class="card-body py-4 px-4 px-md-5">
+  
+              <p class="h1 text-center mt-3 mb-4 pb-3 text-primary">
+                <i class="fas fa-check-square me-1"></i>
+                <u>My Todo-s</u>
+              </p>
+              <div class="pb-2">
+                <div class="card">
+                  <div class="card-body">
+                    <form id="create-note-form">
+                      {% csrf_token %}
+                    <div class="d-flex flex-row align-items-center">
+                        <input type="text" minlength="1" name="name" placeholder="Добавить заметку..." class="form-control form-control-lg" id="note_name">
+                        <a href="#!" data-mdb-tooltip-init title="Set due date"><i
+                            class="fas fa-calendar-alt fa-lg me-3"></i></a>
+                        <div>
+                          <button type="submit" class="btn btn-primary" id="create-note-button">Создать</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="note-success-create" style="display: none;" class="alert alert-success">
+                <h5>Заметка успешно создана!</h5>
+              </div>
+              <div id="note-success-delete" style="display: none;" class="alert alert-danger">
+                <h5>Заметка успешно удалена!</h5>
+              </div>
+  
+              <hr class="my-4">
+  
+              <div class="d-flex justify-content-end align-items-center mb-4 pt-2 pb-3">
+                <p class="small mb-0 me-2 text-muted">Фильтр</p>
+                <select class="form-select w-25" data-mdb-select-init>
+                  <option value="1">Все</option>
+                  <option value="2">Выполненные</option>
+                  <option value="3">Активные</option>
+                  <option value="4">Has due date</option>
+                </select>
+                <p class="small mb-0 ms-4 me-2 text-muted">Сортировать</p>
+                <select class="form-select w-25" data-mdb-select-init>
+                  <option value="1">Дата добавления</option>
+                  <option value="2">Срок оконачания</option>
+                </select>
+                <a href="#!" style="color: #23af89;" data-mdb-tooltip-init title="Ascending"><i
+                    class="fas fa-sort-amount-down-alt ms-2"></i></a>
+              </div>
+  
+              
+              {% for note in notes %}
+              {% if not note.is_active %}
+              <div id="note-element" style="border-radius: 20px;" class="alert alert-info">
+              {% else %}
+              <div id="note-element" style="border-radius: 20px;" class="alert alert-warning">
+              {% endif %} 
+                <ul id="" class="list-group list-group-horizontal rounded-0 bg-transparent">
+                  <li
+                    class="list-group-item px-3 py-1 d-flex align-items-center flex-grow-1 border-0 bg-transparent">
+                    <span style="font-size: 24px;" class="lead fw-normal mb-0">{{ note.name }} <span style="margin-left: 10px; font-size: 12px; font-weight: 500; color: grey;">Статус: {% if note.is_active %}<span style="color: green;">активен</span>{% else %} <span id="{{ note.id }}-note-status" style="color: rgb(211, 211, 66);">выполнен</span>{% endif %} </span></span>
+                  </li>
+                  <li class="list-group-item ps-3 pe-0 py-1 rounded-0 border-0 bg-transparent">
+                    <div class="d-flex flex-row justify-content-end mb-1">
+                      <a href="#!" class="text-info" data-mdb-tooltip-init title="Edit todo"><i
+                          class="fas fa-pencil-alt me-3"></i></a>
+                      <a href="#!" class="text-danger" data-mdb-tooltip-init title="Delete todo"><i
+                          class="fas fa-trash-alt"></i></a>
+                    </div>
+                    <div class="text-end text-muted">
+                      <form action="">
+                        {% csrf_token %}
+
+                        {% if note.is_active == True %}
+                        <button id="complete_note" data-note-id="{{ note.id }}" name="complete_note" value="{{ note.id }}" type="button" class="btn btn-success">Выполненно</button>
+                        {% else %}
+                        <button id="activate_note" name="activate_note" value="{{ note.id }}" type="button" class="btn btn-warning">Активировать</button>
+                        {% endif %}
+                        <button id="delete_note" name="delete_note" type="button" value="{{ note.id }}" class="btn btn-danger delete-btn">Удалить</button>
+                      </form>
+                      <a href="#!" class="text-muted" data-mdb-tooltip-init title="Created date">
+                        <p class="small mb-0"><i class="fas fa-info-circle me-2"></i>{{ note.date_create }}</p>
+                      </a>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            
+              {% endfor %}
+            
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}
