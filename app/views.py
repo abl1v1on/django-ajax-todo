@@ -29,18 +29,18 @@ def delete_note_view(request):
         return JsonResponse({'detail': f'Заметка {note_id} не найдена :('})
 
 
-# @login_required
-# def create_note(request):
-#     if request.method == 'POST':
-#         note_name = request.POST['name']
+@login_required
+def create_note(request):
+    if request.method == 'POST':
+        note_name = request.POST['name']
 
-#         note = note_utils.create_note(name=note_name, user=request.user)
-#         note.save()
-#         return JsonResponse({
-#             'id': note.pk,
-#             'name': note.name,
-#             'date_created': note.date_create
-#         })
+        note = note_utils.create_note(name=note_name, user=request.user)
+        note.save()
+        return JsonResponse({
+            'id': note.pk,
+            'name': note.name,
+            'date_created': note.date_create
+        })
 
 
 @login_required
