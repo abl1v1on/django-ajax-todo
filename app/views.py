@@ -1,10 +1,11 @@
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 from .utils import note_utils
 from .models import Note
-from .forms import CreateNoteForm
+
 
 
 @login_required
@@ -40,8 +41,11 @@ def delete_note_view(request):
     if request.method == 'POST':
         note_id = request.POST['note_id']
         note = Note.objects.get(pk=note_id)
-        note.delete()
-    return HttpResponse('Заметка успешно удалена')
+
+        if note:
+            note.delete()
+            return HttpResponse('Заметка успешно удалена')
+        return JsonResponse({'detail': f'Заметка {note_id} не найдена :('})
 
 
 @login_required
@@ -68,8 +72,25 @@ def complete_note_view(request):
         if note and note.is_active is True:
             note.is_active = False
             note.save()
-        return JsonResponse({
-            'id': note_id,
-            'name': note.name,
-            'date_create': note.date_create
-        })
+            return JsonResponse({
+                'id': note_id,
+                'name': note.name,
+                'date_create': note.date_create
+            })
+
+
+@login_required
+def activate_note(request):
+    if request.method == 'POST':
+        note_id = request.POST['note_id']
+        note = Note.objects.get(pk=note_id)
+
+        if note:
+            note.is_active = True
+            note.save()
+            return JsonResponse({
+                'id': note.pk,
+                'name': note.name,
+                'date_create': note.date_create
+            })
+        
