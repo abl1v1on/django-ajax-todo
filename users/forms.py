@@ -10,7 +10,7 @@ class RegisterUserForm(UserCreationForm):
         'placeholder': 'Введите логин'
     }))
 
-    email = forms.CharField(widget=forms.EmailInput(attrs={
+    email = forms.EmailField(widget=forms.EmailInput(attrs={
         'class': 'form-control form-control-lg',
         'placeholder': 'Введите почту'
     }))
@@ -40,9 +40,10 @@ class RegisterUserForm(UserCreationForm):
 
 
 class LoginUserForm(AuthenticationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={
+    # AuthenticationForm аутентифицирует по username, но USERNAME_FIELD стоит email, поэтому поле здесь именно username
+    username = forms.EmailField(widget=forms.EmailInput(attrs={
         'class': 'form-control form-control-lg',
-        'placeholder': 'Введите логин'
+        'placeholder': 'Введите почту'
     }))
 
     password = forms.CharField(min_length=8, widget=forms.PasswordInput(attrs={
