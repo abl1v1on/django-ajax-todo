@@ -31,7 +31,8 @@ class UserNotesListView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = NoteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(author=request.user)
+        serializer.save(author=request.user, is_active=True)
+        print(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
