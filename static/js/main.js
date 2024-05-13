@@ -11,7 +11,6 @@ $(document).ready(function() {
             },
 
             success: (data) => {
-                $('#note_name')
                 $(this).parent().parent().parent().parent().parent().hide()
                 $("#delete-note-modal").delay(100).fadeIn().delay(50).fadeOut();
                 console.log(data)
@@ -36,6 +35,27 @@ $(document).ready(function() {
                 $(this).attr('id', 'activate_note').attr('name', 'activate_note')
                 // Убрать этот позор
                 $(this).parent().parent().parent().parent().parent().removeClass('alert-warning').addClass('alert-info')
+                console.log(data)
+            }
+        })
+    })
+
+    $(document).on('click', '#activate_note', function() {
+        const noteId = $(this).val()
+
+        $.ajax({
+            type: 'POST',
+            url: 'activate_note/',
+            data: {
+                note_id: noteId,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+
+            success: (data) => {
+                $(this).removeClass('btn-warning').addClass('btn-success').html('Выполненно')
+                $(this).attr('id', 'complete_note').attr('name', 'complete_note')
+                // Убрать этот позор
+                $(this).parent().parent().parent().parent().parent().removeClass('alert-info').addClass('alert-warning')
                 console.log(data)
             }
         })
