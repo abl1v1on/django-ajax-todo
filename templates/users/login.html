@@ -4,6 +4,11 @@
 
 {% block title %}{{ title }}{% endblock %}
 
+{% block js %}
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script src="{% static 'js/main.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <section class="vh-100 gradient-custom">
   <div class="container py-5 h-100">
@@ -15,7 +20,7 @@
             <div class="mb-md-5 mt-md-4 pb-5">
 
               <h2 class="fw-bold mb-2 text-uppercase">Авторизация</h2>
-              <p class="text-white-50 mb-5">Пожалуйста, введите логин и пароль!</p>
+              <p id="login-help-info" class="text-white-50 mb-5">Пожалуйста, введите логин и пароль!</p>
               {% if form.errors %}
                 {% for field in form %}
                     {% for error in field.errors %}
@@ -30,7 +35,7 @@
                     </div>
                 {% endfor %}
               {% endif %}
-              <form action="" method="post">
+              <form action="" id="login-form" method="post">
                   {% csrf_token %}
                   {% for field in form %}
                     <div data-mdb-input-init class="form-outline form-white mb-4">
