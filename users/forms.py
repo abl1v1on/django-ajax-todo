@@ -43,10 +43,12 @@ class LoginUserForm(AuthenticationForm):
     # AuthenticationForm аутентифицирует по username, но USERNAME_FIELD стоит email, поэтому поле здесь именно username
     username = forms.EmailField(widget=forms.EmailInput(attrs={
         'class': 'form-control form-control-lg',
-        'placeholder': 'Введите почту'
+        'placeholder': 'Введите почту',
+        'id': 'email'
     }))
 
     password = forms.CharField(min_length=8, widget=forms.PasswordInput(attrs={
         'class': 'form-control form-control-lg',
-        'placeholder': 'Введите пароль'
+        'placeholder': 'Введите пароль',
+        'id': 'password'
     }))
