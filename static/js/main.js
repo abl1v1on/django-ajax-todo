@@ -1,21 +1,96 @@
-$(document).ready(function() { 
-    
-    function getUserToken() {
+$(document).ready(function() {     
+    const BASE_PATH = 'http://127.0.0.1:8000/'
+
+    $.ajaxSetup({
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('jwt_token'))
+        }
+    })
+
+    function addNewNoteInPage(data) {
+        $('#create-note-modal').delay(100).fadeIn().delay(50).fadeOut()
+        $("#note-list").append(
+            `
+        <div id="note-list" style="border-radius: 20px;" class="alert alert-warning">
+            <ul id="note-list" class="list-group list-group-horizontal rounded-0 bg-transparent">
+            <li
+            class="list-group-item px-3 py-1 d-flex align-items-center flex-grow-1 border-0 bg-transparent">
+            <span style="font-size: 24px;" class="lead fw-normal mb-0">${data.name} <span style="margin-left: 10px; font-size: 12px; font-weight: 500; color: grey;">Статус: <span id="{{ note.id }}-note-status" style="color: green;">активен</span></span></span>
+            </li>
+            <li class="list-group-item ps-3 pe-0 py-1 rounded-0 border-0 bg-transparent">
+            <div class="d-flex flex-row justify-content-end mb-1">
+                <a href="#!" class="text-info" data-mdb-tooltip-init title="Edit todo"><i
+                    class="fas fa-pencil-alt me-3"></i></a>
+                <a href="#!" class="text-danger" data-mdb-tooltip-init title="Delete todo"><i
+                    class="fas fa-trash-alt"></i></a>
+            </div>
+            <div class="text-end text-muted">
+                <form action="">
+                <button id="complete_note" data-note-id="${data.id}" name="complete_note" value="${data.id}" type="button" class="btn btn-success">Выполненно</button>
+                <button id="delete_note" name="delete_note" type="button" value="${data.id}" class="btn btn-danger delete-btn">Удалить</button>
+                </form>
+                <a href="#!" class="text-muted" data-mdb-tooltip-init title="Created date">
+                <p class="small mb-0"><i class="fas fa-info-circle me-2"></i>${data.date_create}</p>
+                </a>
+            </div>
+            </li>
+        </ul>
+        </div>
+            `
+        )
+    }
+
+    function refreshJWTToken() {
+        console.log(localStorage.getItem('refresh'))
+
         $.ajax({
             type: 'POST',
-            url: 'api/v1/token/',
+            url: `${BASE_PATH}api/v1/token/refresh/`,
 
             data: {
-                email: 'abl1v1on@yandex.ru',
-                password: 'asdf7505'
+                refresh: localStorage.getItem('refresh')
             },
 
             success: (data) => {
-                console.log(data)
+                localStorage.setItem('jwt_token', data.access)
+                $.ajaxSetup({
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + data.access)
+                    } 
+                })
+                console.log(localStorage.getItem('refresh'))
             }
         })
     }
-    
+
+    $('#login-form').on('submit', function(e) {
+        // e.preventDefault()
+        const userEmail = $('#email').val()
+        const userPassword = $('#password').val()
+
+        $.ajax({
+            type: 'POST',
+            url: `${BASE_PATH}api/v1/token/`,
+
+            data: {
+                email: userEmail,
+                password: userPassword,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+
+            success: (data) => {
+                let token = data.access
+                // console.log(data.refresh)
+                localStorage.setItem('jwt_token', token)
+                localStorage.setItem('refresh', data.refresh)    
+            },
+
+            error: (xhr, status, error) => {
+                console.log(error)
+            }
+        })
+    })
+
     $(document).on("click", '.delete-btn', function() {
         const noteId = $(this).val()
 
@@ -26,7 +101,7 @@ $(document).ready(function() {
                 note_id: noteId,
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
             },
-
+        
             success: (data) => {
                 $(this).parent().parent().parent().parent().parent().hide()
                 $("#delete-note-modal").delay(100).fadeIn().delay(50).fadeOut();
@@ -81,6 +156,7 @@ $(document).ready(function() {
     $('#create-note-form').on('submit', function (e) {
         e.preventDefault()
         const noteName = $('#note_name').val()
+        console.log(localStorage)
 
         if (noteName.length < 1) {
             return
@@ -88,11 +164,7 @@ $(document).ready(function() {
 
         $.ajax({
             type: 'POST',
-            url: 'api/v1/notes/',
-            
-            headers: {
-                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NjE1NzgxLCJpYXQiOjE3MTU2MTUxODEsImp0aSI6IjQ5NmVhMjc0ZmUyNjQ2YmU5YzNhNTI4OTg2MDhmOWJlIiwidXNlcl9pZCI6MX0.j6z--DVZ0uhIC5ClFkQd9s5af_irUpGW4WqDC5MVWO8'
-            },
+            url: 'create-note/',
 
             data: {
                 name: noteName,
@@ -100,38 +172,16 @@ $(document).ready(function() {
             },
 
             success: (data) => {
-                $('#create-note-modal').delay(100).fadeIn().delay(50).fadeOut()
-                $("#note-list").append(
-                    `
-                    
-              <div id="note-list" style="border-radius: 20px;" class="alert alert-warning">
-                    <ul id="note-list" class="list-group list-group-horizontal rounded-0 bg-transparent">
-                  <li
-                    class="list-group-item px-3 py-1 d-flex align-items-center flex-grow-1 border-0 bg-transparent">
-                    <span style="font-size: 24px;" class="lead fw-normal mb-0">${data.name} <span style="margin-left: 10px; font-size: 12px; font-weight: 500; color: grey;">Статус: <span id="{{ note.id }}-note-status" style="color: green;">активен</span></span></span>
-                  </li>
-                  <li class="list-group-item ps-3 pe-0 py-1 rounded-0 border-0 bg-transparent">
-                    <div class="d-flex flex-row justify-content-end mb-1">
-                      <a href="#!" class="text-info" data-mdb-tooltip-init title="Edit todo"><i
-                          class="fas fa-pencil-alt me-3"></i></a>
-                      <a href="#!" class="text-danger" data-mdb-tooltip-init title="Delete todo"><i
-                          class="fas fa-trash-alt"></i></a>
-                    </div>
-                    <div class="text-end text-muted">
-                      <form action="">
-                        <button id="complete_note" data-note-id="${data.id}" name="complete_note" value="${data.id}" type="button" class="btn btn-success">Выполненно</button>
-                        <button id="delete_note" name="delete_note" type="button" value="${data.id}" class="btn btn-danger delete-btn">Удалить</button>
-                      </form>
-                      <a href="#!" class="text-muted" data-mdb-tooltip-init title="Created date">
-                        <p class="small mb-0"><i class="fas fa-info-circle me-2"></i>${data.date_created}</p>
-                      </a>
-                    </div>
-                  </li>
-                </ul>
-                </div>
-                    `
-                )
+                addNewNoteInPage(data)
                 console.log(data)
+            },
+
+            error: (xhr, status, error) => {
+                // Пока не придумал способа лучше обновлять токен чем так
+                if (error === 'Unauthorized') {
+                    refreshJWTToken()
+                    console.log(error)
+                }
             }
         })
     })
