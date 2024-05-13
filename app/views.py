@@ -35,6 +35,7 @@ def index(request):
 
 
 # ПЕРЕПИСАТЬ НА ДРФ!!!
+@login_required
 def delete_note_view(request):
     if request.method == 'POST':
         note_id = request.POST['note_id']
@@ -43,6 +44,7 @@ def delete_note_view(request):
     return HttpResponse('Заметка успешно удалена')
 
 
+@login_required
 def create_note(request):
     if request.method == 'POST':
         # name получим от имени ajax
@@ -57,6 +59,7 @@ def create_note(request):
         })
 
 
+@login_required
 def complete_note_view(request):
     if request.method == 'POST':
         note_id = request.POST['note_id']
