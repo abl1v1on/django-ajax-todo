@@ -1,4 +1,21 @@
 $(document).ready(function() { 
+    
+    function getUserToken() {
+        $.ajax({
+            type: 'POST',
+            url: 'api/v1/token/',
+
+            data: {
+                email: 'abl1v1on@yandex.ru',
+                password: 'asdf7505'
+            },
+
+            success: (data) => {
+                console.log(data)
+            }
+        })
+    }
+    
     $(document).on("click", '.delete-btn', function() {
         const noteId = $(this).val()
 
@@ -71,7 +88,12 @@ $(document).ready(function() {
 
         $.ajax({
             type: 'POST',
-            url: 'create-note/',
+            url: 'api/v1/notes/',
+            
+            headers: {
+                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NjE1NzgxLCJpYXQiOjE3MTU2MTUxODEsImp0aSI6IjQ5NmVhMjc0ZmUyNjQ2YmU5YzNhNTI4OTg2MDhmOWJlIiwidXNlcl9pZCI6MX0.j6z--DVZ0uhIC5ClFkQd9s5af_irUpGW4WqDC5MVWO8'
+            },
+
             data: {
                 name: noteName,
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
